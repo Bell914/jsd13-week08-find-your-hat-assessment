@@ -121,7 +121,7 @@ class Field {
       // ตรวจสอบการเจอแครอท
       if (currentTile === HAT) {
         console.log(
-          '🎉 You found the hat! You win!'
+          '🎉 You found the carrot You win!'
         );
         isPlaying = false;
         break;
