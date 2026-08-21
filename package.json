@@ -1,0 +1,15 @@
+{
+  "name": "find-your-hat-assessment",
+  "version": "1.0.0",
+  "description": "Find Your Hat Game - Codecademy Assessment for JSD13",
+  "main": "find-your-hat.js",
+  "scripts": {
+    "start": "node find-your-hat.js"
+  },
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

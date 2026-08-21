@@ -1,25 +1,24 @@
 const prompt = require('prompt-sync')({ sigint: true });
-
-const HAT = '🥕';         
-const HOLE = '🕳️';        
-const FIELD_CHAR = '🌱';   
-const PATH_CHAR = '🐰';    
-
+const HAT = '🥕';
+const HOLE = '🕳️';
+const FIELD_CHAR = '🌱';
+const PATH_CHAR = '🐰';
 class Field {
-  
-  constructor(field = [[]]) {
+  constructor(field = [[]], playerX = 0, playerY = 0) {
+    // เก็บแผนที่และตำแหน่งเริ่มต้น
     this.field = field;
-    this.playerX = 0;
-    this.playerY = 0;
+    this.playerX = playerX;
+    this.playerY = playerY;
   }
-
+  // แสดงแผนที่ใน Terminal
   print() {
     const display = this.field
-      .map(row => row.join(''))
+      .map((row) => row.join(''))
       .join('\n');
+
     console.log(display);
   }
-
+  // Methods สำหรับเดิน 4 ทิศทางของน้องกระตุ่น
   moveRight() {
     this.playerX += 1;
   }
@@ -36,7 +35,7 @@ class Field {
     this.playerY += 1;
   }
 
-  // เมธอดตรวจสอบการเดินออกนอกแผนที่
+  // ตรวจสอบว่าผู้เล่นเดินออกนอกแผนที่
   isOutOfBounds() {
     const height = this.field.length;
     const width = this.field[0].length;
@@ -49,71 +48,184 @@ class Field {
     );
   }
 
+  // เริ่มต้นการเล่นเกม
   playGame() {
     let isPlaying = true;
 
     while (isPlaying) {
-      // แสดงแผนที่ปัจจุบัน
       this.print();
 
-      // รับคำสั่งทิศทาง
-      const direction = prompt('Which way? (u/d/l/r): ')?.toLowerCase()?.trim();
+      const direction = prompt(
+        'Move (w/a/s/d, q to quit): '
+      )
+        .toLowerCase()
+        .trim();
 
-      // เดินตามทิศทางที่เลือกตามค่าที่กำหนดก็จะมี u/d/l/rตามนี้
+      // กด q เพื่อออกจากเกม
+      if (direction === 'q') {
+        console.log('Game quit. Bye!');
+        break;
+      }
+
+      // จำตำแหน่งเดิมไว้ก่อนเดิน
+      const previousX = this.playerX;
+      const previousY = this.playerY;
+
+      // เลือกทิศทางการเดินของน้องกระต่าย
       switch (direction) {
-        case 'u':
+        case 'w':
           this.moveUp();
           break;
-        case 'd':
+
+        case 's':
           this.moveDown();
           break;
-        case 'l':
+
+        case 'a':
           this.moveLeft();
           break;
-        case 'r':
+
+        case 'd':
           this.moveRight();
           break;
+
         default:
-          console.log('Invalid input! Please enter u, d, l, or r.\n');
+          console.log(
+            'Invalid input! Please enter w, a, s, d, or q to quit.\n'
+          );
           continue;
       }
-      // ตรวจสอบเงื่อนไขหลังเดินว่าตกขอบแผนที่
+
+      // ตรวจสอบการเดินออกนอกแผนที่
       if (this.isOutOfBounds()) {
-        console.log('🚫 You went out of bounds! Game over.');
+        console.log(
+          '🚫 You went out of bounds! Game over.'
+        );
         isPlaying = false;
         break;
       }
 
-      const currentTile = this.field[this.playerY][this.playerX];
+      // อ่านข้อมูลช่องที่ผู้เล่นเดินไป
+      const currentTile =
+        this.field[this.playerY][this.playerX];
 
-      // ตรวจสอบว่าตกหลุม
+      // ตรวจสอบการตกหลุมของน้องกระต่าย
       if (currentTile === HOLE) {
-        console.log('💀 You fell into a hole! Game over.');
+        console.log(
+          '💀 You fell into a hole! Game over.'
+        );
         isPlaying = false;
         break;
       }
 
-      // ตรวจสอบว่าเจอเป้าหมายแครอท
+      // ตรวจสอบการเจอแครอท
       if (currentTile === HAT) {
-        console.log('🎉 You found the hat! You win!');
+        console.log(
+          '🎉 You found the hat! You win!'
+        );
         isPlaying = false;
         break;
       }
 
-      // 4.4 เดินบนพื้นปกติ -> อัปเดตตำแหน่งใหม่เป็นรอยเดิน
-      this.field[this.playerY][this.playerX] = PATH_CHAR;
-      console.log('\n');
+      // ลบตัวละครออกจากตำแหน่งเดิม
+      this.field[previousY][previousX] =
+        FIELD_CHAR;
+
+      // เพิ่มตัวละครลงในตำแหน่งใหม่
+      this.field[this.playerY][this.playerX] =
+        PATH_CHAR;
+
+      console.log('');
     }
   }
+
+  // สุ่มตำแหน่งแกน X และแกน Y
+  static getRandomPosition(height, width) {
+    return {
+      x: Math.floor(Math.random() * width),
+      y: Math.floor(Math.random() * height),
+    };
+  }
+
+  // สร้างแผนที่แบบสุ่มเพื่อให้เกมสนุกขึ้น
+  static generateField(
+    height = 10,
+    width = 10,
+    holePercentage = 0.2
+  ) {
+    const field = [];
+
+    // สร้างแผนที่ที่มีแต่พื้นที่ปกติก่อน
+    for (let row = 0; row < height; row++) {
+      const currentRow = [];
+
+      for (let col = 0; col < width; col++) {
+        currentRow.push(FIELD_CHAR);
+      }
+
+      field.push(currentRow);
+    }
+
+    // สุ่มตำแหน่งเริ่มต้นของน้องกระต่าย
+    const playerPosition =
+      Field.getRandomPosition(height, width);
+
+    field[playerPosition.y][playerPosition.x] =
+      PATH_CHAR;
+
+    // สุ่มตำแหน่งแครอทโดยไม่ให้ทับกับตัวละคร
+    let hatPosition;
+
+    do {
+      hatPosition =
+        Field.getRandomPosition(height, width);
+    } while (
+      field[hatPosition.y][hatPosition.x] !==
+      FIELD_CHAR
+    );
+
+    field[hatPosition.y][hatPosition.x] = HAT;
+
+    // คำนวณจำนวนหลุมจากเปอร์เซ็นต์ที่กำหนด
+    const totalHoles = Math.floor(
+      height * width * holePercentage
+    );
+
+    let holesCreated = 0;
+
+    // สุ่มตำแหน่งของหลุม
+    while (holesCreated < totalHoles) {
+      const holePosition =
+        Field.getRandomPosition(height, width);
+
+      // วางหลุมเฉพาะช่องที่ยังเป็นพื้นที่ปกติ
+      if (
+        field[holePosition.y][holePosition.x] ===
+        FIELD_CHAR
+      ) {
+        field[holePosition.y][holePosition.x] =
+          HOLE;
+
+        holesCreated += 1;
+      }
+    }
+    // ส่งแผนที่และตำแหน่งผู้เล่นกลับออกไป
+    return {
+      field: field,
+      playerX: playerPosition.x,
+      playerY: playerPosition.y,
+    };
+  }
 }
+const randomMapData =
+  Field.generateField(5, 5, 0.2);
 
-// แผนที่ทดสอบ
-const sampleMap = [
-  [PATH_CHAR, FIELD_CHAR, HOLE],
-  [FIELD_CHAR, HOLE, FIELD_CHAR],
-  [FIELD_CHAR, HAT, FIELD_CHAR],
-];
+// สร้างเกมจากข้อมูลแผนที่แบบสุ่ม
+const myField = new Field(
+  randomMapData.field,
+  randomMapData.playerX,
+  randomMapData.playerY
+);
 
-const myField = new Field(sampleMap);
 console.log('--- Start Game ---');
 myField.playGame();
