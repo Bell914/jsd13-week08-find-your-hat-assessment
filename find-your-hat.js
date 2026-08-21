@@ -7,6 +7,8 @@ class Field {
   
   constructor(field = [[]]) {
     this.field = field;
+    this.playerX = 0;
+    this.playerY = 0;
   }
 
   print() {
@@ -14,6 +16,10 @@ class Field {
       .map(row => row.join(''))
       .join('\n');
     console.log(display);
+  }
+
+  moveRight() {
+    this.playerX += 1;
   }
 }
 
