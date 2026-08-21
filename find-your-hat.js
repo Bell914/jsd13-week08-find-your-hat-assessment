@@ -21,6 +21,18 @@ class Field {
   moveRight() {
     this.playerX += 1;
   }
+
+  moveLeft() {
+    this.playerX -= 1;
+  }
+
+  moveUp() {
+    this.playerY -= 1;
+  }
+
+  moveDown() {
+    this.playerY += 1;
+  }
 }
 
 const sampleMap = [
